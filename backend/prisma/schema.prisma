@@ -7,3 +7,130 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+model CareerProfile {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  fullName  String?  @map("full_name")
+  headline  String?
+  email     String?
+  phone     String?
+  location  String?
+  summary   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  experiences    Experience[]
+  educations     Education[]
+  skills         Skill[]
+  projects       Project[]
+  certifications Certification[]
+  achievements   Achievement[]
+
+  @@map("career_profiles")
+}
+
+model Experience {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId   String    @map("profile_id") @db.Uuid
+  jobTitle    String    @map("job_title")
+  company     String
+  location    String?
+  startDate   DateTime? @map("start_date") @db.Date
+  endDate     DateTime? @map("end_date") @db.Date
+  isCurrent   Boolean   @default(false) @map("is_current")
+  description String?
+  bullets     String[]
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  profile CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("experiences")
+}
+
+model Education {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId    String    @map("profile_id") @db.Uuid
+  institution  String
+  qualification String
+  fieldOfStudy String?   @map("field_of_study")
+  startDate    DateTime? @map("start_date") @db.Date
+  endDate      DateTime? @map("end_date") @db.Date
+  description  String?
+  sortOrder    Int       @default(0) @map("sort_order")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  profile CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("educations")
+}
+
+model Skill {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId String   @map("profile_id") @db.Uuid
+  name      String
+  category  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  profile CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, name])
+  @@map("skills")
+}
+
+model Project {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId    String    @map("profile_id") @db.Uuid
+  name         String
+  description  String?
+  url          String?
+  technologies String[]
+  startDate    DateTime? @map("start_date") @db.Date
+  endDate      DateTime? @map("end_date") @db.Date
+  sortOrder    Int       @default(0) @map("sort_order")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  profile CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("projects")
+}
+
+model Certification {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId     String    @map("profile_id") @db.Uuid
+  name          String
+  issuer        String?
+  issueDate     DateTime? @map("issue_date") @db.Date
+  expiryDate    DateTime? @map("expiry_date") @db.Date
+  credentialUrl String?   @map("credential_url")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  profile CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("certifications")
+}
+
+model Achievement {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId   String    @map("profile_id") @db.Uuid
+  title       String
+  description String?
+  date        DateTime? @db.Date
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  profile CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("achievements")
+}
