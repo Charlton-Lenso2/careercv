@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
+import { Prisma } from "@prisma/client";
 import { env } from "./config/env";
 import healthRoutes from "./routes/health.routes";
 import meRoutes from "./routes/me.routes";
@@ -22,6 +23,12 @@ app.use((_req: Request, res: Response) => {
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof SyntaxError) {
     res.status(400).json({ success: false, message: "Invalid JSON body." });
+    return;
+  }
+
+  // P2002 = a unique rule was broken (e.g. the same skill added twice).
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+    res.status(409).json({ success: false, message: "That item already exists." });
     return;
   }
 

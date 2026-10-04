@@ -35,7 +35,7 @@ export function updateProfile(userId: string, data: ProfileInput) {
   });
 }
 
-async function profileIdFor(userId: string): Promise<string> {
+export async function profileIdFor(userId: string): Promise<string> {
   const profile = await prisma.careerProfile.upsert({
     where: { userId },
     update: {},
