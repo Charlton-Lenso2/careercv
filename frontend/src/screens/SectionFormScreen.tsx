@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useLayoutEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { findSection } from "../config/sections";
 import { useProfile } from "../context/ProfileContext";
 import { buildPayload, FormValues, initialValues } from "../forms/formUtils";
@@ -78,7 +78,17 @@ export default function SectionFormScreen({ navigation, route }: Props) {
   };
 
   const confirmDelete = () => {
-    Alert.alert(`Delete this ${section.singular.toLowerCase()}?`, "This can't be undone.", [
+    const title = `Delete this ${section.singular.toLowerCase()}?`;
+
+    // Alert.alert is a no-op in a browser, so use the browser's own confirm there.
+    if (Platform.OS === "web") {
+      if (window.confirm(`${title} This can't be undone.`)) {
+        doDelete();
+      }
+      return;
+    }
+
+    Alert.alert(title, "This can't be undone.", [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: doDelete },
     ]);

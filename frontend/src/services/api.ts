@@ -25,7 +25,7 @@ export async function apiFetch<T>(
   const token = data.session?.access_token;
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10000);
+  const timer = setTimeout(() => controller.abort(), 15000);
 
   try {
     const res = await fetch(`${API_URL}${path}`, {
@@ -51,7 +51,10 @@ export async function apiFetch<T>(
     return body as T;
   } catch (error) {
     if (error instanceof ApiError) throw error;
-    throw new ApiError("Could not reach the server.", 0);
+
+    // In development builds, show which address failed. This is hidden in release builds.
+    const hint = __DEV__ ? ` (tried ${API_URL}${path})` : "";
+    throw new ApiError(`Could not reach the server.${hint}`, 0);
   } finally {
     clearTimeout(timer);
   }
